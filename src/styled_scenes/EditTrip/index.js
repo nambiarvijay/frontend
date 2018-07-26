@@ -8,7 +8,6 @@ import { fitBounds } from 'google-map-react/utils';
 import moment from 'moment';
 import Parse from 'parse';
 import { Divider, Message, Popup } from 'semantic-ui-react';
-import Tag from './../Service/components/Tag';
 // COMPONENTS
 import TopBar from './../../shared_components/TopBarWithSearch';
 import Results from './components/Results';
@@ -115,10 +114,6 @@ const ProfileWrap = styled.div`
   margin-bottom: 15px;
 `;
 
-const TagsWrapper = styled.section`
-  margin-left: 20px;
-`;
-
 const DropItem = styled.div`
   padding: 5px 10px;
   position: relative;
@@ -181,6 +176,7 @@ export default class TripsScene extends Component {
         longitude: query.latlng && query.latlng.lng,
         city: query.city,
         country: query.country,
+        tags: query.tags.map(tag => tag.label) || []
       },
       true,
     );
@@ -335,12 +331,6 @@ export default class TripsScene extends Component {
                 isOwner={this.state.isOwner}
                 serviceAvailabilityCheckInProgress={this.props.serviceAvailabilityCheckInProgress}
               />
-              <TagsWrapper>
-                {trip.tags &&
-                  trip.tags.map(tag => (
-                    <Tag key={tag.label} item={tag} href={`/results?tags=${tag.label}`} />
-                  ))}
-              </TagsWrapper>
               <Divider horizontal>Trip itinerary</Divider>
               <TripActionsWrap>
                 <Popup

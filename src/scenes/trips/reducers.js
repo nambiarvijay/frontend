@@ -13,6 +13,7 @@ const initialState = {
     startDate: '',
     endDate: '',
     person: {},
+    tags: []
   },
   showTripStatusChanged: false,
   isImageUploadInProgress: false,

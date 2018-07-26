@@ -8,6 +8,11 @@ import LocationControl from 'shared_components/Form/LocationControl';
 import ToolbarButton from './ToolbarButton';
 import toolBarPropTypes from './toolbar-proptypes';
 import ResponsiveToolbarWrap from './ResponsiveToolBarWrap';
+import { Dropdown } from 'semantic-ui-react';
+import tagsData from './../../../../data/tags';
+import Tag from './../../../Service/components/Tag';
+
+const tagsDropdownOptions = tagsData.map(value => ({ text: value.label, value: value.label }));
 
 const GridFormContainer = styled(Form)`
   display: grid;
@@ -34,6 +39,7 @@ const EndDateDiv = styled.div`
     height: 100%;
   }
 `;
+
 export default class OwnerToolBar extends Component {
   static propTypes = toolBarPropTypes;
 
@@ -140,6 +146,27 @@ export default class OwnerToolBar extends Component {
               onCheckAvailibilityClick={onCheckAvailabilityClick}
               serviceAvailabilityCheckInProgress={serviceAvailabilityCheckInProgress}
             />
+            <Dropdown
+              name="tags"
+              options={tagsDropdownOptions}
+              placeholder="Edit tags"
+              search
+              selection
+              fluid
+              multiple
+              value={state.tags.map(tag => tag.label) || []}
+              onChange={ (e, { name, value }) => {
+                  onValueChange('tags', value.map(tag => ({label: tag})));
+                  setTimeout(onSubmit, 0);
+                }
+              }
+            />
+            <LocationDiv>
+            {trip.tags &&
+              trip.tags.map(tag => (
+                <Tag key={tag.label} item={tag} href={`/results?tags=${tag.label}`} />
+              ))}
+            </LocationDiv>
           </GridFormContainer>
         )}
       </ResponsiveToolbarWrap>
