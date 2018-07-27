@@ -116,18 +116,18 @@ class EditTripForm extends Component {
           </Form.Field>
 
           <Form.Field required>
-            <label>Duration (days)</label>
+            <label>Trip Length (days)</label>
             <Form.Input
-              name="duration"
+              name="dayCount"
               placeholder="3"
               type="number"
               icon="calendar outline"
               iconPosition="left"
-              value={values.duration}
-              error={!!(touched.duration && errors.duration)}
+              value={values.dayCount}
+              error={!!(touched.dayCount && errors.dayCount)}
               {...defaultProps}
             />
-            {touched.duration && errors.duration && <ErrorMsg>{errors.duration}</ErrorMsg>}
+            {touched.dayCount && errors.dayCount && <ErrorMsg>{errors.dayCount}</ErrorMsg>}
           </Form.Field>
           <Form.Field>
             <label>Tags</label>
@@ -154,16 +154,16 @@ class EditTripForm extends Component {
 }
 
 function validate(values) {
-  const requiredFields = ['title', 'description', 'formattedAddress', 'duration'];
+  const requiredFields = ['title', 'description', 'formattedAddress', 'dayCount'];
   const errors = checkRequiredFields(values, requiredFields);
-  if (!errors.duration && isNaN(values.duration)) {
-    errors.duration = 'Invalid number';
+  if (!errors.dayCount && isNaN(values.dayCount)) {
+    errors.dayCount = 'Invalid number';
   }
-  if (!errors.duration && values.duration < 1) {
-    errors.duration = 'Minimum is 1';
+  if (!errors.dayCount && values.dayCount < 1) {
+    errors.dayCount = 'Minimum is 1';
   }
-  if (!errors.duration && !Number.isInteger(parseFloat(values.duration))) {
-    errors.duration = 'Only integers allowed';
+  if (!errors.dayCount && !Number.isInteger(parseFloat(values.dayCount))) {
+    errors.dayCount = 'Only integers allowed';
   }
   return errors;
 }
@@ -173,8 +173,8 @@ export default withFormik({
     title: trip.title,
     description: trip.description,
     formattedAddress: trip.formattedAddress,
-    duration: trip.duration || '',
     tags: trip.tags.map(tag => tag.label) || []
+    dayCount: trip.dayCount || '',
   }),
   validate,
   handleSubmit: (values, { props }) => {
