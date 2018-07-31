@@ -26,6 +26,7 @@ import i18n from './../../../libs/i18n';
 const Wrap = styled.div`
   display: flex;
   flex-direction: row;
+  margin-left: 20px;
 `;
 
 const MobileWrap = styled.div`
@@ -405,6 +406,7 @@ class SearchFilters extends Component {
                   min={1}
                   max={10}
                   value={person_nb || 2}
+                  style={{padding: '5px 9px'}}
                 />
                 <ClearInputIcon onClick={this.clear_person_nb} link name="close" />
               </Wrap>
