@@ -3,12 +3,14 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { getLatLng, geocodeByPlaceId } from 'react-places-autocomplete';
 import { withFormik } from 'formik';
-import { Form, Dropdown } from 'semantic-ui-react';
+import { Form, Dropdown, Segment, Label } from 'semantic-ui-react';
 import SemanticLocationControl from 'shared_components/Form/SemanticLocationControl';
-import tagsData from './../../../../data/tags';
+import tagsData from 'data/tags';
+import DayPickerInput from 'react-day-picker/DayPickerInput';
+import { formatDate } from 'react-day-picker/moment';
 
 // import Form from 'shared_components/Form';
-import { checkRequiredFields } from 'libs/Utils';
+import { checkRequiredFields, getISODateString } from 'libs/Utils';
 import TripLengthFormInput from './TripLengthFormInput';
 import EditTripContainer from 'scenes/trips/containers/EditTripContainer';
 
@@ -20,6 +22,9 @@ const ErrorMsg = styled.div`
 
 const OwnerForm = styled(Form)`
   width: 100%;
+  .DayPickerInput {
+    min-width: 100%;
+  }
 `;
 
 class EditTripForm extends Component {
@@ -55,6 +60,20 @@ class EditTripForm extends Component {
     const { setValues, values } = this.props;
     setValues({ ...values, formattedAddress: '', country: '', city: '', latlng: '' });
   };
+
+  onTagsChange = (e, { value }) => {
+    this.props.setFieldValue('tags', value);
+    setTimeout(this.props.submitForm, 1);
+  };
+
+  onStartDateChange = day => {
+    this.props.setFieldValue('beginDate', day);
+    setTimeout(this.props.submitForm, 1);
+  };
+
+  renderStartDateInput = props => (
+    <Form.Input icon="calendar outline" iconPosition="left" {...props} />
+  );
 
   render() {
     const {
@@ -139,6 +158,7 @@ class EditTripForm extends Component {
             {touched.dayCount && errors.dayCount && <ErrorMsg>{errors.dayCount}</ErrorMsg>}
           </Form.Field>
         </Form.Group>
+
         <Form.Field>
           <label>Tags</label>
           <Dropdown
@@ -151,12 +171,53 @@ class EditTripForm extends Component {
             multiple
             value={values.tags}
             disabled={isTripBooked}
-            onChange={(e, { name, value }) => {
-              this.props.setFieldValue('tags', value);
-              setTimeout(submitForm, 1);
-            }}
+            onChange={this.onTagsChange}
           />
         </Form.Field>
+
+        <Segment padded>
+          <Label attached="top">Required if booking this trip</Label>
+          <Form.Group widths="equal">
+            <Form.Field>
+              <label>Start date</label>
+              <DayPickerInput
+                value={values.beginDate}
+                component={this.renderStartDateInput}
+                formatDate={formatDate}
+                format="LL"
+                inputProps={{
+                  name: 'beginDate',
+                  disabled: isTripBooked,
+                  readOnly: true,
+                  placeholder: 'Select start date',
+                }}
+                dayPickerProps={{
+                  disabledDays: { before: new Date() },
+                  selectedDays: values.beginDate,
+                }}
+                onDayChange={this.onStartDateChange}
+              />
+              {touched.beginDate && errors.beginDate && <ErrorMsg>{errors.beginDate}</ErrorMsg>}
+            </Form.Field>
+
+            <Form.Field>
+              <label>Number of people</label>
+              <Form.Input
+                name="numberOfPerson"
+                placeholder="2"
+                type="number"
+                icon="user"
+                iconPosition="left"
+                value={values.numberOfPerson}
+                error={!!(touched.numberOfPerson && errors.numberOfPerson)}
+                disabled={isTripBooked}
+                {...defaultProps}
+              />
+              {touched.numberOfPerson &&
+                errors.numberOfPerson && <ErrorMsg>{errors.numberOfPerson}</ErrorMsg>}
+            </Form.Field>
+          </Form.Group>
+        </Segment>
       </OwnerForm>
     );
   }
@@ -165,14 +226,18 @@ class EditTripForm extends Component {
 function validate(values) {
   const requiredFields = ['title', 'description', 'formattedAddress', 'dayCount'];
   const errors = checkRequiredFields(values, requiredFields);
-  if (!errors.dayCount && isNaN(values.dayCount)) {
-    errors.dayCount = 'Invalid number';
-  }
-  if (!errors.dayCount && values.dayCount < 1) {
-    errors.dayCount = 'Minimum is 1';
-  }
-  if (!errors.dayCount && !Number.isInteger(parseFloat(values.dayCount))) {
-    errors.dayCount = 'Only integers allowed';
+  const integerFields = ['dayCount', 'peopleCount'];
+  for (const field of integerFields) {
+    const value = values[field];
+    if (!errors[field] && value && isNaN(value)) {
+      errors[field] = 'Invalid number';
+    }
+    if (!errors[field] && value && value < 1) {
+      errors[field] = 'Minimum is 1';
+    }
+    if (!errors[field] && value && !Number.isInteger(parseFloat(value))) {
+      errors[field] = 'Only integers allowed';
+    }
   }
   return errors;
 }
@@ -184,6 +249,8 @@ export default withFormik({
     formattedAddress: trip.formattedAddress,
     dayCount: trip.dayCount || '',
     tags: (trip.tags || []).map(tag => tag.label),
+    beginDate: new Date(getISODateString(trip.beginDate)),
+    numberOfPerson: trip.numberOfPerson,
   }),
   validate,
   handleSubmit: (values, { props }) => {

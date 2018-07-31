@@ -87,7 +87,7 @@ export default class TripLengthFormInput extends Component {
             name={name}
             placeholder={placeholder}
             type="number"
-            icon="calendar outline"
+            icon="calendar plus outline"
             iconPosition="left"
             value={value}
             error={error}
